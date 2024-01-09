@@ -1,0 +1,120 @@
+#include "DHT.h"
+#include <LiquidCrystal_I2C.h>
+#include <Wire.h>
+
+#define DHTPIN 8         // The pin to which the DHT22 sensor is connected
+DHT dht11(DHTPIN, DHT22);
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+#define moistureSensorPin A0 // Analog Pin for Soil Moisture Sensor
+#define RELAY_PIN 2
+#define WATERPUMP_RELAY_PIN 7
+
+const int minMoistureValue = 1023;
+const int maxMoistureValue = 0;
+const int moistureThreshold = 50;
+int current_command = -1;
+unsigned long previousMillis = 0;
+const long interval = 20000; // Update every 20 seconds
+const float TEMP_THRESHOLD_UPPER = 30.0; // upper threshold of temperature, change to your desired value
+
+float temperature;
+
+float getTemperature() {
+  float temperature = dht11.readTemperature();
+  return temperature;
+}
+
+float getHumidity() {
+  float humidity = dht11.readHumidity();
+  return humidity;
+}
+
+int getMoisture() {
+  int moistureLevel = analogRead(moistureSensorPin);
+  return map(moistureLevel, minMoistureValue, maxMoistureValue, 0, 100);
+}
+
+void receiveCommand() {
+  if (Serial.available()) {
+    int sent = Serial.parseInt();
+    Serial.println("ok");
+    current_command = sent;
+  }
+}
+
+void sendResponse() {
+  String message = String(getTemperature()) + " " + String(getHumidity()) + " " + String(getMoisture());
+  Serial.println(message);
+}
+
+void setup() {
+  Serial.begin(9600);
+  dht11.begin();
+  Wire.begin();
+  lcd.init();
+  lcd.backlight(); // Turn on the backlight
+  pinMode(DHTPIN, INPUT);
+  pinMode(RELAY_PIN, OUTPUT);
+  pinMode(WATERPUMP_RELAY_PIN, OUTPUT);
+  sendResponse(); // Initial display
+}
+
+void loop() {
+  float temperature = getTemperature();
+  int moisture = getMoisture();
+
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("T: ");
+  lcd.print(temperature, 1);
+  lcd.print("C M: "); // Display temperature with one decimal place
+  lcd.print(moisture);
+  lcd.print("%");
+  lcd.setCursor(0, 1);
+  lcd.print("H: ");
+  lcd.print(getHumidity(), 2); // Display humidity with two decimal places
+  lcd.print("%      "); // Adding spaces to clear any leftover characters
+
+  Serial.print("Humidity: ");
+  Serial.print(getHumidity());
+  Serial.print(" %\t");
+  Serial.print("Temperature: ");
+  Serial.print(temperature);
+  Serial.print(" °C\t");
+  Serial.print("Moisture: ");
+  Serial.print(moisture);
+  Serial.print("%");
+  Serial.println();
+
+  // Control the water pump relay based on moisture level
+  if (moisture > moistureThreshold) {
+    Serial.println("Moisture is below the threshold. Turning on the water pump.");
+    digitalWrite(WATERPUMP_RELAY_PIN, LOW); // turn on water pump
+  } else {
+    Serial.println("Moisture is above the threshold. Turning off the water pump.");
+    digitalWrite(WATERPUMP_RELAY_PIN, HIGH); // turn off water pump
+  }
+
+  // Control the temperature-based relay
+  if (temperature > TEMP_THRESHOLD_UPPER) {
+    Serial.println("Temperature is above the upper threshold. Turning on the relay.");
+    digitalWrite(RELAY_PIN, LOW); // turn on temperature-based relay
+  } else if (temperature < TEMP_THRESHOLD_UPPER) {
+    Serial.println("Temperature is below the upper threshold. Turning off the relay.");
+    digitalWrite(RELAY_PIN, HIGH); // turn off temperature-based relay
+  }
+
+  unsigned long currentMillis = millis();
+
+  if (currentMillis - previousMillis >= interval) {
+    previousMillis = currentMillis;
+    sendResponse();
+  }
+
+  if (current_command == -1) {
+    receiveCommand();
+  }
+
+  // wait a few seconds between measurements and actions
+  delay(2000);
+}
