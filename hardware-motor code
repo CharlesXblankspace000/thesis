@@ -1,0 +1,217 @@
+#include <SoftwareSerial.h>
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+#include <Servo.h>
+
+// RS485 Communication
+#define PIN_RE 6
+#define PIN_DE 7
+SoftwareSerial LC_NPK_SER(8, 9); // Change these pins as needed
+
+byte databuf[11];
+
+// LCD
+LiquidCrystal_I2C lcd(0x3F, 16, 2); // Change the I2C address if needed
+
+// NPK Sensor Commands
+const byte nitro[] = {0x01, 0x03, 0x00, 0x1e, 0x00, 0x01, 0xe4, 0x0c};
+const byte phos[] = {0x01, 0x03, 0x00, 0x1f, 0x00, 0x01, 0xb5, 0xcc};
+const byte pota[] = {0x01, 0x03, 0x00, 0x20, 0x00, 0x01, 0x85, 0xc0};
+
+// Stepper Motor
+const int stepPin = 2;
+const int dirPin = 3;
+const int enPin = 10;
+bool stepperMotorEnabled = true;
+
+// Servo Motor
+Servo servoMotor;
+const int servoPin = 5; // Change to the appropriate pin
+
+// Relay
+#define relayPin 4
+bool relayOpen = false;
+
+void setup()
+{
+  Serial.begin(115200);
+
+  // RS485 Setup
+  LC_NPK_SER.begin(4800);
+  pinMode(PIN_RE, OUTPUT);
+  pinMode(PIN_DE, OUTPUT);
+  digitalWrite(PIN_DE, LOW);
+  digitalWrite(PIN_RE, LOW);
+
+  // LCD Setup
+  lcd.init();
+  lcd.clear();
+  lcd.backlight();
+
+  // Stepper Motor Setup
+  pinMode(stepPin, OUTPUT);
+  pinMode(dirPin, OUTPUT);
+  pinMode(enPin, OUTPUT);
+  digitalWrite(enPin, LOW);
+
+  // Servo Motor Setup
+  servoMotor.attach(servoPin);
+
+  // Relay Setup
+  pinMode(relayPin, OUTPUT);
+}
+
+void loop()
+{
+  // Perform continuous NPK readings with a 3-second delay
+  byte val1, val2, val3;
+
+  Serial.print("Nitrogen: ");
+  val1 = nitrogen();
+  Serial.print(val1);
+  Serial.print(" mg/kg\t");
+
+  Serial.print("Phosphorous: ");
+  val2 = phosphorous();
+  Serial.print(val2);
+  Serial.print(" mg/kg\t");
+
+  Serial.print("Potassium: ");
+  val3 = potassium();
+  Serial.print(val3);
+  Serial.println(" mg/kg");
+  // Add a 3-second delay
+  delay(3000);
+
+  // Display values on LCD
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("N: ");
+  lcd.print(val1);
+
+  lcd.setCursor(0, 1);
+  lcd.print("P: ");
+  lcd.print(val2);
+  lcd.print("  K: ");
+  lcd.print(val3);
+
+  // Stepper Motor Movement
+  if (stepperMotorEnabled)
+  {
+    digitalWrite(dirPin, HIGH);
+    for (int x = 0; x < 2000; x++)
+    {
+      digitalWrite(stepPin, HIGH);
+      delayMicroseconds(4000);
+      digitalWrite(stepPin, LOW);
+      delayMicroseconds(4000);
+    }
+    delay(1000); // One-second delay
+  }
+
+  // Servo Motor Control
+  if ((val1 > 0 || val2 > 0 || val3 > 0) && (val1 >= 1 || val2 >= 1 || val3 >= 1))
+  {
+    static bool servoRotated = false; // To keep track if servo has rotated
+
+    if (!servoRotated)
+    {
+      servoMotor.write(180);     // Rotate the servo motor to 180 degrees
+      digitalWrite(enPin, HIGH); // Disable the stepper motor
+      stepperMotorEnabled = false; // Disable the stepper motor permanently
+      servoRotated = true;        // Set the flag to true
+    }
+  }
+  else
+  {
+    servoMotor.write(0);      // Rotate the servo motor back to 0 degrees
+    digitalWrite(enPin, LOW); // Enable the stepper motor
+  }
+
+  // Relay Control
+  if ((val1 >= 1 || val2 >= 1 || val3 >= 1) && !relayOpen)
+  {
+    // Open the relay permanently
+    digitalWrite(relayPin, HIGH);
+    relayOpen = true;
+  }
+}
+
+byte nitrogen()
+{
+  LC_NPK_SER.flush();
+  digitalWrite(PIN_DE, HIGH);
+  digitalWrite(PIN_RE, HIGH);
+  delay(1);
+  for (uint8_t i = 0; i < sizeof(nitro); i++)
+    LC_NPK_SER.write(nitro[i]);
+  LC_NPK_SER.flush();
+  digitalWrite(PIN_DE, LOW);
+  digitalWrite(PIN_RE, LOW);
+  delay(200);
+
+  if (LC_NPK_SER.available() >= 7)
+  {
+    for (byte i = 0; i < 7; i++)
+    {
+      databuf[i] = LC_NPK_SER.read();
+    }
+    return databuf[4];
+  }
+
+  return 0;
+}
+
+byte phosphorous()
+{
+  LC_NPK_SER.flush();
+  digitalWrite(PIN_DE, HIGH);
+  digitalWrite(PIN_RE, HIGH);
+  delay(1);
+  for (uint8_t i = 0; i < sizeof(phos); i++)
+    LC_NPK_SER.write(phos[i]);
+  LC_NPK_SER.flush();
+  digitalWrite(PIN_DE, LOW);
+  digitalWrite(PIN_RE, LOW);
+  delay(200);
+
+  if (LC_NPK_SER.available() >= 7)
+  {
+    for (byte i = 0; i < 7; i++)
+    {
+      databuf[i] = LC_NPK_SER.read();
+    }
+    return databuf[4];
+  }
+
+  return 0;
+}
+
+byte potassium()
+{
+  while (LC_NPK_SER.available())
+  {
+    LC_NPK_SER.read(); // Read and discard any available bytes
+  }
+
+  digitalWrite(PIN_DE, HIGH);
+  digitalWrite(PIN_RE, HIGH);
+  delay(1);
+  for (uint8_t i = 0; i < sizeof(pota); i++)
+    LC_NPK_SER.write(pota[i]);
+  LC_NPK_SER.flush(); // This line is optional; you can remove it if unnecessary
+  digitalWrite(PIN_DE, LOW);
+  digitalWrite(PIN_RE, LOW);
+  delay(200);
+
+  if (LC_NPK_SER.available() >= 7)
+  {
+    for (byte i = 0; i < 7; i++)
+    {
+      databuf[i] = LC_NPK_SER.read();
+    }
+    return databuf[4];
+  }
+
+  return 0;
+}
