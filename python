@@ -1,0 +1,88 @@
+import serial
+import time
+import RPi.GPIO as GPIO
+import threading
+
+GPIO.setmode(GPIO.BCM)
+
+
+
+arduino1 = serial.Serial('/dev/ttyUSB0', 9600, timeout=1)  # Arduino 1
+arduino2 = serial.Serial('/dev/ttyACM0', 115200, timeout=1)  # Arduino 2
+
+def get_conditions_arduino1():
+    arduino1.write(bytes('0\n', 'utf-8'))
+    response = arduino1.readline().decode('utf-8').rstrip()
+    return response
+
+def get_conditions_arduino2():
+    arduino2.write(bytes('0\n', 'utf-8'))
+    response = arduino2.readline().decode('utf-8').rstrip()
+    return response
+
+def send_command_to_arduino2(command):
+    arduino2.write(bytes(command, 'utf-8'))
+
+def read_arduino1_data():
+    try:
+        while True:
+            response_arduino1 = get_conditions_arduino1().strip()
+            print(response_arduino1)
+            data_arduino1 = response_arduino1.split('\t')
+
+            if len(data_arduino1) == 7 and data_arduino1[0] == 'Humidity:':
+                try:
+                    moisture = float(data_arduino1[6].rstrip('%'))
+                    print(f"Moisture: {moisture}%")
+
+                except ValueError as e:
+                    print(f"Error converting values: {e}")
+
+            time.sleep(5)
+
+    except KeyboardInterrupt:
+        GPIO.cleanup()
+        arduino1.close()
+
+def read_arduino2_data():
+    try:
+        while True:
+            response_arduino2 = get_conditions_arduino2().strip()
+            print(response_arduino2)
+            # Process the NPK data as needed
+
+            time.sleep(5)
+
+    except KeyboardInterrupt:
+        GPIO.cleanup()
+        arduino2.close()
+
+def command_input_thread():
+    try:
+        while True:
+            command_input = input("Enter command (1 to stop stepper and rotate servo): ")
+            if command_input == '1':
+                send_command_to_arduino2(command_input)
+                print("Command sent to Arduino 2")
+
+    except KeyboardInterrupt:
+        pass
+
+if __name__ == '__main__':
+    try:
+        thread_arduino1 = threading.Thread(target=read_arduino1_data)
+        thread_arduino2 = threading.Thread(target=read_arduino2_data)
+        thread_command_input = threading.Thread(target=command_input_thread)
+
+        thread_arduino1.start()
+        thread_arduino2.start()
+        thread_command_input.start()
+
+        thread_arduino1.join()
+        thread_arduino2.join()
+        thread_command_input.join()
+
+    except KeyboardInterrupt:
+        GPIO.cleanup()
+        arduino1.close()
+        arduino2.close()
