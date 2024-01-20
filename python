@@ -8,7 +8,7 @@ from firebase_admin import credentials, firestore
 GPIO.setmode(GPIO.BCM)
 
 # Initialize Firebase
-cred = credentials.Certificate("/home/greencure/Downloads/greencure-55f94-firebase-adminsdk-jbdh9-77d6c27d82.json")
+cred = credentials.Certificate('greencure.json')
 firebase_admin.initialize_app(cred)
 
 # Access the Firestore database
