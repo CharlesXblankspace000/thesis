@@ -12,12 +12,13 @@ LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 const int minMoistureValue = 1023;
 const int maxMoistureValue = 0;
-const int moistureThreshold = 50;
-int currentCommand = -1;
 
 float latestTemperature = 0;
 float latestHumidity = 0;
 int latestMoisture = 0;
+
+String UUID = "ARDUINO1";
+int currentCommand = -1;
 
 void setup() {
   Serial.begin(9600);
@@ -75,6 +76,11 @@ void loop() {
 
   else if (currentCommand == 7) {
     turnOffWaterPump();
+    currentCommand = -1;
+  }
+
+  else if (currentCommand == 98) {
+    getUUID();
     currentCommand = -1;
   }
 
@@ -143,6 +149,10 @@ void turnOnWaterPump(){
 
 void turnOffWaterPump(){
   digitalWrite(waterPumpRelayPin, LOW);
+}
+
+void getUUID(){
+  sendResponse(UUID);
 }
 
 void resetState(){

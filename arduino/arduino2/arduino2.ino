@@ -28,6 +28,7 @@ byte latestNitrogen = 0;
 byte latestPhophorus = 0;
 byte latestPotassium = 0;
 
+String UUID = "ARDUINO2";
 int currentCommand = -1;
 
 void setup()
@@ -110,6 +111,11 @@ if (currentCommand == -1) {
 
   else if (currentCommand == 109) {
     stopDCMotor();
+    currentCommand = -1;
+  }
+
+  else if (currentCommand == 98) {
+    getUUID();
     currentCommand = -1;
   }
 
@@ -257,6 +263,10 @@ void runBackground(){
     digitalWrite(stepPin, LOW);
     delayMicroseconds(500);
   }
+}
+
+void getUUID(){
+  sendResponse(UUID);
 }
 
 void resetState(){
