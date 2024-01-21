@@ -118,7 +118,7 @@ if (currentCommand == -1) {
 
 void receiveCommand() {
   if (Serial.available()) {
-    int sent = Serial.parseInt();
+    int sent = Serial.readStringUntil('\n').toInt();
     Serial.println("ok");
     currentCommand = sent;
   }

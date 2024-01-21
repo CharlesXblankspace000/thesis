@@ -4,7 +4,7 @@
 
 const int dhtPin = 8;
 const int moistureSensorPin = A0;
-const int fanRelayPin = 2;
+const int fanRelayPin = 9;
 const int waterPumpRelayPin = 7;
 
 DHT dht11(dhtPin, DHT22);
@@ -59,12 +59,12 @@ void loop() {
   }
 
   else if (currentCommand == 4) {
-    turnOnFan();
+    turnOffFan();
     currentCommand = -1;
   }
 
   else if (currentCommand == 5) {
-    turnOffFan();
+    turnOnFan();
     currentCommand = -1;
   }
 
@@ -81,7 +81,7 @@ void loop() {
 
 void receiveCommand() {
   if (Serial.available()) {
-    int sent = Serial.parseInt();
+    int sent = Serial.readStringUntil('\n').toInt();
     Serial.println("ok");
     currentCommand = sent;
   }
