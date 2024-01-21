@@ -60,55 +60,55 @@ if (currentCommand == -1) {
     receiveCommand();
   } 
   
-  else if (currentCommand == 0) {
+  else if (currentCommand == 100) {
     byte nitrogen = getNitrogen();
     sendResponse(String(nitrogen));
     currentCommand = -1;
   }
 
-  else if (currentCommand == 1) {
+  else if (currentCommand == 101) {
     byte phosphorus = getPhosphorus();
     sendResponse(String(phosphorus));
     currentCommand = -1;
   }
 
-  else if (currentCommand == 2) {
+  else if (currentCommand == 102) {
     byte potassium = getPotassium();
     sendResponse(String(potassium));
     currentCommand = -1;
   }
 
-  else if (currentCommand == 3) {
+  else if (currentCommand == 103) {
     displayLatestReadings();
     currentCommand = -1;
   }
 
-  else if (currentCommand == 4) {
+  else if (currentCommand == 104) {
     startStepperMotor();
     currentCommand = -1;
   }
 
-  else if (currentCommand == 5) {
+  else if (currentCommand == 105) {
     stopStepperMotor();
     currentCommand = -1;
   }
 
-  else if (currentCommand == 6) {
+  else if (currentCommand == 106) {
     openHatch();
     currentCommand = -1;
   }
 
-  else if (currentCommand == 7) {
+  else if (currentCommand == 107) {
     closeHatch();
     currentCommand = -1;
   }
 
-  else if (currentCommand == 8) {
+  else if (currentCommand == 108) {
     startDCMotor();
     currentCommand = -1;
   }
 
-  else if (currentCommand == 9) {
+  else if (currentCommand == 109) {
     stopDCMotor();
     currentCommand = -1;
   }
