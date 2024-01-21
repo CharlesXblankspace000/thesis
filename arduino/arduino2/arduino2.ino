@@ -113,7 +113,7 @@ if (currentCommand == -1) {
     currentCommand = -1;
   }
 
-  else if (currentCommand == 199) {
+  else if (currentCommand == 99) {
     resetState();
     currentCommand = -1;
   }
