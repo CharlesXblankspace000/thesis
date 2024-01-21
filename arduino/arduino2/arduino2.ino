@@ -247,13 +247,9 @@ void displayLatestReadings(){
 
 void runBackground(){
   if(stepperMotorEnabled){
-    for (int x = 0; x < 2000; x++)
-    {
-      digitalWrite(stepPin, HIGH);
-      delayMicroseconds(4000);
-      digitalWrite(stepPin, LOW);
-      delayMicroseconds(4000);
-    }
-    delay(1000);
+    digitalWrite(stepPin, HIGH);
+    delayMicroseconds(500);
+    digitalWrite(stepPin, LOW);
+    delayMicroseconds(500);
   }
 }
