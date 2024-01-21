@@ -23,7 +23,9 @@ class Machine:
 
         self.arduino1 = Arduino(arduino_ports[0], baudrate=9600, commands=arduino_1_commands)
         self.arduino2 = Arduino(arduino_ports[1], baudrate=115200,  commands=arduino_2_commands)
-
+        self.arduino1.reset_state()
+        self.arduino2.reset_state()
+        
         cred = credentials.Certificate(certificate)
         app = firebase_admin.initialize_app(cred)
         db = firestore.client()
