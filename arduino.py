@@ -22,7 +22,7 @@ class Arduino(Serial):
         if command in self.commands:
             while True:
                 self.write(bytes(str(command)+'\n','utf-8'))
-                response = self.get_arduino_response()
+                response = self.get_response()
                 if(response == 'ok'):
                     break
         else:
