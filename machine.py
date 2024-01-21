@@ -21,8 +21,8 @@ class Machine:
         arduino_2_commands = list(range(100, 110))
         arduino_2_commands.extend([98, 99])
 
-        self.arduino1 = Arduino(None, baudrate=9600, commands=arduino_1_commands)
-        self.arduino2 = Arduino(None, baudrate=115200,  commands=arduino_2_commands)
+        self.arduino1 = Arduino(arduino_ports[0], baudrate=9600, commands=arduino_1_commands)
+        self.arduino2 = Arduino(arduino_ports[1], baudrate=115200,  commands=arduino_2_commands)
 
         cred = credentials.Certificate(certificate)
         app = firebase_admin.initialize_app(cred)
