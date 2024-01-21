@@ -17,6 +17,9 @@ const int stepPin = 2;
 const int dirPin = 3;
 const int enPin = 10;
 bool stepperMotorEnabled = false;
+bool stepState = false;
+unsigned long previousMillis = 0;
+const long stepInterval = 4; // in microseconds
 
 Servo servoMotor;
 const int servoPin = 5;
@@ -257,11 +260,19 @@ void displayLatestReadings(){
 }
 
 void runBackground(){
+  unsigned long currentMillis = millis();
   if(stepperMotorEnabled){
-    digitalWrite(stepPin, HIGH);
-    delayMicroseconds(500);
-    digitalWrite(stepPin, LOW);
-    delayMicroseconds(500);
+    if(currentMillis - previousMillis >= stepInterval){
+      stepState = !stepState;
+      previousMillis = currentMillis;
+
+      if(stepState){
+        digitalWrite(stepPin, HIGH);
+      }
+      else{
+        digitalWrite(stepPin, LOW);
+      }
+    }
   }
 }
 
