@@ -28,7 +28,6 @@ void setup() {
   pinMode(dhtPin, INPUT);
   pinMode(fanRelayPin, OUTPUT);
   pinMode(waterPumpRelayPin, OUTPUT);
-  sendResponse();
 }
 
 void loop() {
@@ -108,7 +107,7 @@ int getMoisture() {
   int rawInput = analogRead(moistureSensorPin);
   int moistureLevel = map(moistureLevel, minMoistureValue, maxMoistureValue, 0, 100);
   latestMoisture = moistureLevel;
-  return moistureLevel
+  return moistureLevel;
 }
 
 void displayLatestReadings(){
