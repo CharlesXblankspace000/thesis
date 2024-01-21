@@ -113,6 +113,11 @@ if (currentCommand == -1) {
     currentCommand = -1;
   }
 
+  else if (currentCommand == 199) {
+    resetState();
+    currentCommand = -1;
+  }
+
   runBackground();
 }
 
@@ -252,4 +257,14 @@ void runBackground(){
     digitalWrite(stepPin, LOW);
     delayMicroseconds(500);
   }
+}
+
+void resetState(){
+  latestNitrogen = 0;
+  latestPhophorus = 0;
+  latestPotassium = 0;
+  stopStepperMotor();
+  stopDCMotor();
+  closeHatch();
+  lcd.clear();
 }

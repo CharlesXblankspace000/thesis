@@ -77,6 +77,11 @@ void loop() {
     turnOffWaterPump();
     currentCommand = -1;
   }
+
+  else if (currentCommand == 99) {
+    resetState();
+    currentCommand = -1;
+  }
 }
 
 void receiveCommand() {
@@ -138,4 +143,13 @@ void turnOnWaterPump(){
 
 void turnOffWaterPump(){
   digitalWrite(waterPumpRelayPin, LOW);
+}
+
+void resetState(){
+  latestTemperature = 0;
+  latestHumidity = 0;
+  latestMoisture = 0;
+  turnOffFan();
+  turnOffWaterPump();
+  lcd.clear();
 }
