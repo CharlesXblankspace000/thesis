@@ -30,6 +30,10 @@ class Machine:
         self.parameter_reference = db.collection('parameters')
         self.user_reference = db.collection('users')
 
+        self._fan_state = False
+        self._water_pump_state = False
+
+
 
     def __initialize_logger(self):
         format = logging.Formatter('%(asctime)s [%(levelname)s] - %(message)s.')
@@ -253,7 +257,10 @@ class Machine:
         '''
         Turn on fan in the arduino
         '''
+        if self._fan_state:
+            return
         self.arduino1.send_command(4)
+        self._fan_state = True
 
 
     
@@ -261,7 +268,10 @@ class Machine:
         '''
         Turn off fan in the arduino
         '''
+        if not self._fan_state:
+            return
         self.arduino1.send_command(5)
+        self._fan_state = False
 
 
 
@@ -269,7 +279,10 @@ class Machine:
         '''
         Turn on water pump in the arduino
         '''
+        if self._water_pump_state:
+            return
         self.arduino1.send_command(6)
+        self._water_pump_state = True
 
 
     
@@ -277,7 +290,10 @@ class Machine:
         '''
         Turn off water pump in the arduino
         '''
+        if not self._water_pump_state:
+            return
         self.arduino1.send_command(7)
+        self._water_pump_state = False
 
 
 
