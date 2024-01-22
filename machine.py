@@ -88,8 +88,10 @@ class Machine:
         Switch machine state
         '''
         self._state = not self._state
+        self.logger.info(f'State changed to: {self._state}')
         if not self._state:
             self._harvest_mode = False
+            self.logger.info('Harvest mode change to False')
 
 
 
@@ -98,6 +100,7 @@ class Machine:
         Switch harvest mode
         '''
         self._harvest_mode = not self._harvest_mode
+        self.logger.info(f'Harvest mode changed to: {self._harvest_mode}')
 
 
     #############################################
@@ -132,6 +135,7 @@ class Machine:
             'created_at': datetime.now(tz=timezone.utc)
         }
         self.parameter_reference.add(data)
+        self.logger.info(f'Added parameter to firebase: {data}')
 
 
 
@@ -166,6 +170,7 @@ class Machine:
             tokens= self._get_user_tokens()
         )
         messaging.send_multicast(message)
+        self.logger.info(f'Notification sent: {title}, {body}')
 
 
     #############################################
@@ -182,6 +187,7 @@ class Machine:
         Returns:
         temperature (float) : Temperature
         '''
+        self.logger.info('Getting temperature')
         self.arduino1.send_command(0)
         while True:
             response = self.arduino1.get_response()
@@ -190,6 +196,7 @@ class Machine:
                 break
             except:
                 pass
+        self.logger.info(f'Got temperature: {temperature}')
         return temperature
     
 
@@ -201,6 +208,7 @@ class Machine:
         Returns:
         humidity (float) : Humidity
         '''
+        self.logger.info('Getting humidity')
         self.arduino1.send_command(1)
         while True:
             response = self.arduino1.get_response()
@@ -209,6 +217,7 @@ class Machine:
                 break
             except:
                 pass
+        self.logger.info(f'Got humidity: {humidity}')
         return humidity
     
 
@@ -220,6 +229,7 @@ class Machine:
         Returns:
         moisture (float) : Moisture
         '''
+        self.logger.info('Getting moisture')
         self.arduino1.send_command(2)
         while True:
             response = self.arduino1.get_response()
@@ -228,6 +238,7 @@ class Machine:
                 break
             except:
                 pass
+        self.logger.info(f'Got moisture: {moisture}')
         return moisture
     
 
@@ -239,6 +250,7 @@ class Machine:
         Returns:
         nitrogen (float) : Nitrogen
         '''
+        self.logger.info('Getting nitrogen')
         self.arduino2.send_command(100)
         while True:
             response = self.arduino2.get_response()
@@ -247,6 +259,7 @@ class Machine:
                 break
             except:
                 pass
+        self.logger.info(f'Got nitrogen: {nitrogen}')
         return nitrogen
     
 
@@ -258,6 +271,7 @@ class Machine:
         Returns:
         phosphorus (float) : Phosphorus
         '''
+        self.logger.info('Getting phosphorus')
         self.arduino2.send_command(101)
         while True:
             response = self.arduino2.get_response()
@@ -266,6 +280,7 @@ class Machine:
                 break
             except:
                 pass
+        self.logger.info(f'Got phosphorus: {phosphorus}')
         return phosphorus
     
 
@@ -277,6 +292,7 @@ class Machine:
         Returns:
         potassium (float) : Potassium
         '''
+        self.logger.info('Getting potassium')
         self.arduino2.send_command(102)
         while True:
             response = self.arduino2.get_response()
@@ -285,6 +301,7 @@ class Machine:
                 break
             except:
                 pass
+        self.logger.info(f'Got potassium: {potassium}')
         return potassium
     
 
@@ -296,6 +313,7 @@ class Machine:
         readings to reflect
         '''
         self.arduino1.send_command(3)
+        self.logger.info('Displayed latest THM readings')
 
 
 
@@ -306,6 +324,7 @@ class Machine:
         readings to reflect
         '''
         self.arduino2.send_command(103)
+        self.logger.info('Displayed latest NPK readings')
 
 
     
@@ -317,6 +336,7 @@ class Machine:
             return
         self.arduino1.send_command(4)
         self._fan_state = True
+        self.logger.info('Fan turned on')
 
 
     
@@ -328,6 +348,7 @@ class Machine:
             return
         self.arduino1.send_command(5)
         self._fan_state = False
+        self.logger.info('Fan turned off')
 
 
 
@@ -339,6 +360,7 @@ class Machine:
             return
         self.arduino1.send_command(6)
         self._water_pump_state = True
+        self.logger.info('Water pump turned on')
 
 
     
@@ -350,6 +372,7 @@ class Machine:
             return
         self.arduino1.send_command(7)
         self._water_pump_state = False
+        self.logger.info('Water pump turned off')
 
 
 
@@ -358,6 +381,7 @@ class Machine:
         Start stepper motor in the arduino
         '''
         self.arduino2.send_command(104)
+        self.logger.info('Stepper motor started')
 
 
 
@@ -366,6 +390,7 @@ class Machine:
         Start stepper motor in the arduino
         '''
         self.arduino2.send_command(105)
+        self.logger.info('Stepper motor stopped')
 
 
 
@@ -374,6 +399,7 @@ class Machine:
         Rotate servo in the arduino to open hatch 
         '''
         self.arduino2.send_command(106)
+        self.logger.info('Hatched opened')
 
 
 
@@ -382,6 +408,7 @@ class Machine:
         Rotate servo in the arduino to close hatch 
         '''
         self.arduino2.send_command(107)
+        self.logger.info('Hatch closed')
 
 
 
@@ -390,6 +417,7 @@ class Machine:
         Start DC Motor in the arduino
         '''
         self.arduino2.send_command(108)
+        self.logger.info('DC Motor started')
 
 
 
@@ -398,3 +426,4 @@ class Machine:
         Stop DC Motor in the arduino
         '''
         self.arduino2.send_command(109)
+        self.logger.info('DC Motor stopped')
