@@ -23,8 +23,16 @@ def validate_parameters(parameters: dict):
     return True
 
 
+just_started = True
+
 while True:
     if machine.state:
+        if just_started:
+            machine.start_stepper_motor()
+            time.sleep(30)
+            machine.stop_stepper_motor()
+            just_started = False
+
         if machine.harvest_mode and not harvest_mode_initialized:
             machine.open_hatch()
             machine.start_dc_motor()
