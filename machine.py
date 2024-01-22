@@ -21,10 +21,10 @@ class Machine:
         arduino_2_commands = list(range(100, 110))
         arduino_2_commands.extend([98, 99])
 
-        self.arduino1 = Arduino(arduino_ports[0], baudrate=9600, commands=arduino_1_commands)
-        self.arduino2 = Arduino(arduino_ports[1], baudrate=115200,  commands=arduino_2_commands)
-        self.arduino1.reset_state()
-        self.arduino2.reset_state()
+        self.arduino1 = Arduino(arduino_ports[0], baudrate=9600, commands=arduino_1_commands, timeout=1)
+        self.arduino2 = Arduino(arduino_ports[1], baudrate=115200,  commands=arduino_2_commands, timeout=1)
+        #self.arduino1.reset_state()
+        #self.arduino2.reset_state()
         
         cred = credentials.Certificate(certificate)
         app = firebase_admin.initialize_app(cred)
@@ -187,7 +187,7 @@ class Machine:
         '''
         self.arduino2.send_command(100)
         while True:
-            response = self.arduino1.get_response()
+            response = self.arduino2.get_response()
             try:
                 nitrogen = float(response)
                 break
@@ -206,7 +206,7 @@ class Machine:
         '''
         self.arduino2.send_command(101)
         while True:
-            response = self.arduino1.get_response()
+            response = self.arduino2.get_response()
             try:
                 phosphorus = float(response)
                 break
@@ -225,7 +225,7 @@ class Machine:
         '''
         self.arduino2.send_command(102)
         while True:
-            response = self.arduino1.get_response()
+            response = self.arduino2.get_response()
             try:
                 potassium = float(response)
                 break

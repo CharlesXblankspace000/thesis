@@ -5,7 +5,7 @@ import time
 
 machine = Machine(
     certificate='greencure.json',
-    arduino_ports=(None, None)
+    arduino_ports=('/dev/ttyUSB0','/dev/ttyACM0')
 )
 
 TEMPERATURE_THRESHOLD = 30
@@ -36,7 +36,7 @@ while True:
     else:
         machine.turn_off_fan()
 
-    if moisture > MOISTURE_THRESHOLD:
+    if moisture < MOISTURE_THRESHOLD:
         machine.turn_on_water_pump()
     else:
         machine.turn_off_water_pump()
