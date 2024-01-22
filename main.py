@@ -14,8 +14,22 @@ MOISTURE_THRESHOLD = 50
 start_time = datetime.now()
 day_time = datetime.now()
 
+harvest_mode_initialized = False
+
 while True:
     if machine.state:
+        if machine.harvest_mode and not harvest_mode_initialized:
+            machine.open_hatch()
+            machine.start_dc_motor()
+            harvest_mode_initialized = True
+        elif not machine.harvest_mode and harvest_mode_initialized:
+            machine.close_hatch()
+            machine.stop_dc_motor()
+            harvest_mode_initialized = False
+
+        if machine.harvest_mode:
+            continue
+
         temperature = machine.get_temperature()
         humidity = machine.get_humidity()
         moisture = machine.get_moisture()
