@@ -14,7 +14,7 @@ class Arduino(Serial):
         '''
         Send command to arduino. 
         Can be used to explicitly invoke Arduino operation without calling specific functions \n
-5
+
         Parameters:
         command (int) : Command to send
         '''
@@ -24,7 +24,6 @@ class Arduino(Serial):
                 self.write(bytes(str(command)+'\n','utf-8'))
                 response = self.get_response()
                 if(response == 'ok'):
-                
                     break
         else:
             raise Exception('Unknown command')
