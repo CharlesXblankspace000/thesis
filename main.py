@@ -16,6 +16,13 @@ day_time = datetime.now()
 
 harvest_mode_initialized = False
 
+def validate_parameters(parameters: dict):
+    for key, value in parameters.items():
+        if not isinstance(value, (int, float)):
+            return False
+    return True
+
+
 while True:
     if machine.state:
         if machine.harvest_mode and not harvest_mode_initialized:
@@ -45,6 +52,9 @@ while True:
             'phosphorus': phosphorus,
             'potassium': potassium
         }
+
+        if not validate_parameters(data):
+            continue
 
         if temperature > TEMPERATURE_THRESHOLD:
             machine.turn_on_fan()
