@@ -115,10 +115,8 @@ float getHumidity() {
 }
 
 int getMoisture() {
-  int rawInput = analogRead(moistureSensorPin);
-  int moisture = map(rawInput, minMoistureValue, maxMoistureValue, 0, 100);
-  latestMoisture = moisture;
-  return moisture;
+  int moistureLevel = analogRead(moistureSensorPin);
+  return map(moistureLevel, minMoistureValue, maxMoistureValue, 0, 100);
 }
 
 void displayLatestReadings(){
