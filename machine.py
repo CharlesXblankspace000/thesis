@@ -88,6 +88,8 @@ class Machine:
         Switch machine state
         '''
         self._state = not self._state
+        if not self._state:
+            self._harvest_mode = False
 
 
 
