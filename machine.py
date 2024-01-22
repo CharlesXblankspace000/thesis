@@ -1,6 +1,7 @@
 from arduino import Arduino
 from firebase_admin import credentials, firestore, messaging
 from datetime import datetime, timezone
+import RPi.GPIO as GPIO
 import firebase_admin
 import logging
 
@@ -23,8 +24,9 @@ class Machine:
 
         self.arduino1 = Arduino(arduino_ports[0], baudrate=9600, commands=arduino_1_commands, timeout=1)
         self.arduino2 = Arduino(arduino_ports[1], baudrate=115200,  commands=arduino_2_commands, timeout=1)
-        #self.arduino1.reset_state()
-        #self.arduino2.reset_state()
+        
+        self.arduino1.reset_state()
+        self.arduino2.reset_state()
         
         cred = credentials.Certificate(certificate)
         app = firebase_admin.initialize_app(cred)
@@ -32,9 +34,37 @@ class Machine:
         self.parameter_reference = db.collection('parameters')
         self.user_reference = db.collection('users')
 
+        self._state = False
+        self._harvest_mode = False
         self._fan_state = False
         self._water_pump_state = False
 
+        state_button = 10
+        harvest_button = 9
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(state_button, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+        GPIO.setup(harvest_button, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+        GPIO.add_event_detect(state_button, GPIO.RISING, callback = self._switch_state, bouncetime=2000)
+        GPIO.add_event_detect(harvest_button, GPIO.RISING, callback = self._switch_harvest_mode, bouncetime=2000)
+
+
+
+    @property
+    def state(self):
+        '''
+        Machine state
+        '''
+        return self._state
+    
+
+
+    @property
+    def harvest_mode(self):
+        '''
+        Harvest mode
+        '''
+        return self._harvest_mode
+    
 
 
     def __initialize_logger(self):
@@ -44,6 +74,28 @@ class Machine:
         self.logger = logging.getLogger('machine')
         self.logger.addHandler(main_handler)
         self.logger.setLevel(logging.INFO)
+
+
+    #############################################
+    #                                           #
+    #              GPIO Functions               #
+    #                                           #
+    #############################################
+        
+
+    def _switch_state(self, channel):
+        '''
+        Switch machine state
+        '''
+        self._state = not self._state
+
+
+
+    def _switch_harvest_mode(self, channel):
+        '''
+        Switch harvest mode
+        '''
+        self._harvest_mode = not self._harvest_mode
 
 
     #############################################
