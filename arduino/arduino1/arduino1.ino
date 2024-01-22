@@ -60,12 +60,12 @@ void loop() {
   }
 
   else if (currentCommand == 4) {
-    turnOffFan();
+    turnOnFan();
     currentCommand = -1;
   }
 
   else if (currentCommand == 5) {
-    turnOnFan();
+    turnOffFan();
     currentCommand = -1;
   }
 
@@ -115,10 +115,8 @@ float getHumidity() {
 }
 
 int getMoisture() {
-  int rawInput = analogRead(moistureSensorPin);
-  int moistureLevel = map(moistureLevel, minMoistureValue, maxMoistureValue, 0, 100);
-  latestMoisture = moistureLevel;
-  return moistureLevel;
+  int moistureLevel = analogRead(moistureSensorPin);
+  return map(moistureLevel, minMoistureValue, maxMoistureValue, 0, 100);
 }
 
 void displayLatestReadings(){
