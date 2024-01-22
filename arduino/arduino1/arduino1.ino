@@ -118,7 +118,7 @@ int getMoisture() {
   int rawInput = analogRead(moistureSensorPin);
   int moisture = map(rawInput, minMoistureValue, maxMoistureValue, 0, 100);
   latestMoisture = moisture;
-  return moisture
+  return moisture;
 }
 
 void displayLatestReadings(){
