@@ -32,7 +32,16 @@ class Machine:
         app = firebase_admin.initialize_app(cred)
         db = firestore.client()
         self.parameter_reference = db.collection('parameters')
+        self.state_reference = db.collection('states').document('current')
+        self.harvest_trigger_reference = db.collection('triggers').document('harvest')
         self.user_reference = db.collection('users')
+        self.harvest_trigger_reference.on_snapshot(self._switch_harvest_mode_firebase)
+
+        initial_state = {
+            'power': False,
+            'harvest': False
+        }
+        self.state_reference.update(initial_state)
 
         self._state = False
         self._harvest_mode = False
@@ -92,6 +101,10 @@ class Machine:
         if not self._state:
             self._harvest_mode = False
             self.logger.info('Harvest mode change to False')
+        self.update_state({
+            'power': self._state,
+            'harvest': self._harvest_mode
+        })
 
 
 
@@ -100,6 +113,10 @@ class Machine:
         Switch harvest mode
         '''
         self._harvest_mode = not self._harvest_mode
+        self.update_state({
+            'power': self._state,
+            'harvest': self._harvest_mode
+        })
         self.logger.info(f'Harvest mode changed to: {self._harvest_mode}')
 
 
@@ -109,6 +126,19 @@ class Machine:
     #                                           #
     #############################################
         
+
+    def _switch_harvest_mode_firebase(self, channel):
+        '''
+        Switch harvest mode
+        '''
+        self._harvest_mode = not self._harvest_mode
+        self.update_state({
+            'power': self._state,
+            'harvest': self._harvest_mode
+        })
+        self.logger.info(f'Harvest mode changed via firebase to: {self._harvest_mode}')
+
+
 
     def update_parameters(self, parameters: dict):
         '''
@@ -136,6 +166,25 @@ class Machine:
         }
         self.parameter_reference.add(data)
         self.logger.info(f'Added parameter to firebase: {data}')
+
+
+
+    def update_state(self, states: dict):
+        '''
+        Update state to firebase
+        Sample format:
+        ```python
+        states = {
+            'power': True,
+            'harvest': False,
+        }
+        ```
+        '''
+        data = {
+            'power': states['power'],
+            'harvest': states['harvest']
+        }
+        self.state_reference.update(data)
 
 
 
