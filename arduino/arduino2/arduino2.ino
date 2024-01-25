@@ -54,7 +54,7 @@ void setup()
   digitalWrite(enPin, LOW);
 
   servoMotor.attach(servoPin);
-
+  servoMotor.write(0);
   pinMode(motorRelayPin, OUTPUT);
 }
 

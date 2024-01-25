@@ -50,3 +50,6 @@ while True:
         day_time = datetime.now()
 
     time.sleep(5)
+
+    machine.display_latest_readings_npk()
+    machine.display_latest_readings_thm()
