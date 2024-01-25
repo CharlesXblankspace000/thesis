@@ -127,7 +127,7 @@ class Machine:
     #############################################
         
 
-    def _switch_harvest_mode_firebase(self, channel):
+    def _switch_harvest_mode_firebase(self, doc_snapshot, changes, read_time):
         '''
         Switch harvest mode
         '''
