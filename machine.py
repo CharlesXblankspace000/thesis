@@ -27,6 +27,11 @@ class Machine:
         
         self.arduino1.reset_state()
         self.arduino2.reset_state()
+
+        self._state = False
+        self._harvest_mode = False
+        self._fan_state = False
+        self._water_pump_state = False
         
         cred = credentials.Certificate(certificate)
         app = firebase_admin.initialize_app(cred)
@@ -42,11 +47,6 @@ class Machine:
             'harvest': False
         }
         self.state_reference.update(initial_state)
-
-        self._state = False
-        self._harvest_mode = False
-        self._fan_state = False
-        self._water_pump_state = False
 
         state_button = 10
         harvest_button = 9
