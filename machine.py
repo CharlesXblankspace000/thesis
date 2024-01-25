@@ -131,6 +131,7 @@ class Machine:
         '''
         Switch harvest mode
         '''
+        print(doc_snapshot[-1].to_dict())
         self._harvest_mode = not self._harvest_mode
         self.update_state({
             'power': self._state,
