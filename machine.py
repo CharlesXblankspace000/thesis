@@ -27,7 +27,13 @@ class Machine:
         
         self.arduino1.reset_state()
         self.arduino2.reset_state()
-        
+
+        self._state = False
+        self._harvest_mode = False
+        self._fan_state = False
+        self._water_pump_state = False
+        self.__initialized = False
+
         cred = credentials.Certificate(certificate)
         app = firebase_admin.initialize_app(cred)
         db = firestore.client()
@@ -43,11 +49,6 @@ class Machine:
         }
         self.state_reference.update(initial_state)
 
-        self._state = False
-        self._harvest_mode = False
-        self._fan_state = False
-        self._water_pump_state = False
-
         state_button = 10
         harvest_button = 9
         GPIO.setmode(GPIO.BCM)
@@ -55,6 +56,8 @@ class Machine:
         GPIO.setup(harvest_button, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
         GPIO.add_event_detect(state_button, GPIO.RISING, callback = self._switch_state, bouncetime=2000)
         GPIO.add_event_detect(harvest_button, GPIO.RISING, callback = self._switch_harvest_mode, bouncetime=2000)
+
+        self.__initialized = True
 
 
 
@@ -96,6 +99,8 @@ class Machine:
         '''
         Switch machine state
         '''
+        if not self.__initialized:
+            return
         self._state = not self._state
         self.logger.info(f'State changed to: {self._state}')
         if not self._state:
@@ -112,6 +117,8 @@ class Machine:
         '''
         Switch harvest mode
         '''
+        if not self.__initialized or not self._state:
+            return
         self._harvest_mode = not self._harvest_mode
         self.update_state({
             'power': self._state,
