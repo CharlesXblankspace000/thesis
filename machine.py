@@ -43,7 +43,7 @@ class Machine:
         main_handler.setFormatter(format)
         self.logger = logging.getLogger('machine')
         self.logger.addHandler(main_handler)
-        self.logger.setLevel(logging.INFO)
+        self.logger.setLevel(logging.DEBUG)
 
 
     #############################################
