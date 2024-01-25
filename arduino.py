@@ -18,7 +18,7 @@ class Arduino(Serial):
         Parameters:
         command (int) : Command to send
         '''
-        self.logger.info(f'Sending command to {self.port}: {command}')
+        self.logger.debug(f'Sending command to {self.port}: {command}')
         if command in self.commands:
             while True:
                 self.write(bytes(str(command)+'\n','utf-8'))
@@ -41,7 +41,7 @@ class Arduino(Serial):
             response = self.readline().decode('utf-8').rstrip()
         except UnicodeDecodeError:
             response = self.readline().decode('utf-8').rstrip()
-        self.logger.info(f'Got response from {self.port}: {response}')
+        self.logger.debug(f'Got response from {self.port}: {response}')
         return response
     
 
