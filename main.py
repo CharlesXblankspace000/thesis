@@ -13,12 +13,13 @@ MOISTURE_THRESHOLD = 50
 
 start_time = datetime.now()
 day_time = datetime.now()
+npk_failed_notified = False
 
 harvest_mode_initialized = False
 
 def validate_parameters(parameters: dict):
     for key, value in parameters.items():
-        if not isinstance(value, (int, float)):
+        if not isinstance(value, (int, float)) or value == 'NaN':
             return False
     return True
 
@@ -54,7 +55,7 @@ while True:
 
         machine.display_latest_readings_npk()
         machine.display_latest_readings_thm()
-        
+
         data = {
             'temperature': temperature,
             'humidity': humidity,
@@ -84,6 +85,18 @@ while True:
             time.sleep(30)
             machine.stop_stepper_motor()
             day_time = datetime.now()
+
+        # Flag checker if npk failed to met required values
+        if not npk_failed_notified and \
+            datetime.now() - day_time >= timedelta(days=10):
+            if nitrogen <= 200 or phosphorus <= 100 or potassium <= 100:
+                machine.update_npk_failed()
+            npk_failed_notified = True
+
+        # Flag checker if harvest is ready
+        if not machine.harvest_ready and nitrogen >= 200 \
+            and phosphorus >= 100 and potassium >= 100:
+            machine.update_harvest_ready()
 
         time.sleep(5)
 

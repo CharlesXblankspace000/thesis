@@ -33,6 +33,9 @@ class Machine:
         self._fan_state = False
         self._water_pump_state = False
         self.__initialized = False
+        self._npk_failed = False
+        self._harvest_ready = False
+        self._last_start = datetime.now(tz=timezone.utc)
 
         cred = credentials.Certificate(certificate)
         app = firebase_admin.initialize_app(cred)
@@ -43,11 +46,7 @@ class Machine:
         self.user_reference = db.collection('users')
         self.harvest_trigger_reference.on_snapshot(self._switch_harvest_mode_firebase)
 
-        initial_state = {
-            'power': False,
-            'harvest': False
-        }
-        self.state_reference.update(initial_state)
+        self.update_state()
 
         state_button = 10
         harvest_button = 9
@@ -79,6 +78,24 @@ class Machine:
     
 
 
+    @property
+    def last_start(self):
+        '''
+        Machine last started
+        '''
+        return self._last_start
+
+
+
+    @property
+    def harvest_ready(self):
+        '''
+        Is harvest ready?
+        '''
+        return self._harvest_ready
+    
+    
+
     def __initialize_logger(self):
         format = logging.Formatter('%(asctime)s [%(levelname)s] - %(message)s.')
         main_handler = logging.FileHandler('machine.log')
@@ -106,10 +123,7 @@ class Machine:
         if not self._state:
             self._harvest_mode = False
             self.logger.info('Harvest mode change to False')
-        self.update_state({
-            'power': self._state,
-            'harvest': self._harvest_mode
-        })
+        self.update_state()
 
 
 
@@ -120,10 +134,7 @@ class Machine:
         if not self.__initialized or not self._state:
             return
         self._harvest_mode = not self._harvest_mode
-        self.update_state({
-            'power': self._state,
-            'harvest': self._harvest_mode
-        })
+        self.update_state()
         self.logger.info(f'Harvest mode changed to: {self._harvest_mode}')
 
 
@@ -141,10 +152,7 @@ class Machine:
         if not self.__initialized or not self._state:
             return
         self._harvest_mode = not self._harvest_mode
-        self.update_state({
-            'power': self._state,
-            'harvest': self._harvest_mode
-        })
+        self.update_state()
         self.logger.info(f'Harvest mode changed via firebase to: {self._harvest_mode}')
 
 
@@ -181,18 +189,21 @@ class Machine:
     def update_state(self, states: dict):
         '''
         Update state to firebase
-        Sample format:
-        ```python
-        states = {
-            'power': True,
-            'harvest': False,
-        }
-        ```
         '''
         data = {
-            'power': states['power'],
-            'harvest': states['harvest']
+            'power': self._state,
+            'harvest': self._harvest_mode,
+            'failed': self._npk_failed,
+            'ready': self._harvest_ready
         }
+
+        if states['power']:
+            start = datetime.now(tz=timezone.utc)
+            data['started'] = start
+            self._last_start = start
+        else:
+            data['started'] = self._last_start
+
         self.state_reference.update(data)
 
 
@@ -229,6 +240,30 @@ class Machine:
         )
         messaging.send_multicast(message)
         self.logger.info(f'Notification sent: {title}, {body}')
+
+
+
+    def update_npk_failed(self, value: bool):
+        '''
+        Update npk failed value
+
+        Parameters:
+        value (bool) : NPK failed?
+        '''
+        self._npk_failed = value
+        self.update_state()
+
+
+
+    def update_harvest_ready(self, value: bool):
+        '''
+        Update harvest ready value
+
+        Parameters:
+        value (bool) : Harvest ready?
+        '''
+        self._harvest_ready = value
+        self.update_state()
 
 
     #############################################
