@@ -102,7 +102,7 @@ class Machine:
         main_handler.setFormatter(format)
         self.logger = logging.getLogger('machine')
         self.logger.addHandler(main_handler)
-        self.logger.setLevel(logging.INFO)
+        self.logger.setLevel(logging.DEBUG)
 
 
     #############################################
@@ -185,7 +185,7 @@ class Machine:
 
 
 
-    def update_state(self, states: dict):
+    def update_state(self):
         '''
         Update state to firebase
         '''
@@ -196,7 +196,7 @@ class Machine:
             'ready': self._harvest_ready
         }
 
-        if states['power']:
+        if self._state:
             start = datetime.now(tz=timezone.utc)
             data['started'] = start
             self._last_start = start
