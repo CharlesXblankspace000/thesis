@@ -54,7 +54,7 @@ class Machine:
         GPIO.setup(state_button, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
         GPIO.setup(harvest_button, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
         GPIO.add_event_detect(state_button, GPIO.RISING, callback = self._switch_state, bouncetime=2000)
-        GPIO.add_event_detect(harvest_button, GPIO.RISING, callback = self._switch_harvest_mode, bouncetime=2000)
+        #GPIO.add_event_detect(harvest_button, GPIO.RISING, callback = self._switch_harvest_mode, bouncetime=2000)
 
         self.__initialized = True
 
@@ -149,6 +149,8 @@ class Machine:
         '''
         Switch harvest mode
         '''
+        if not self.__initialized:
+            return
         print(doc_snapshot[-1].to_dict())
         self._harvest_mode = not self._harvest_mode
         self.update_state()
