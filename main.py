@@ -97,7 +97,7 @@ while True:
         # Flag checker if harvest is ready
         if not machine.harvest_ready and nitrogen >= 200 \
             and phosphorus >= 100 and potassium >= 100:
-            machine.update_harvest_ready()
+            machine.update_harvest_ready(True)
 
         time.sleep(10)
 
