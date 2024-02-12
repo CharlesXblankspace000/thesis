@@ -1,6 +1,6 @@
 from arduino import Arduino
 from firebase_admin import credentials, firestore, messaging
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import RPi.GPIO as GPIO
 import firebase_admin
 import logging
@@ -206,6 +206,23 @@ class Machine:
             data['started'] = self._last_start
 
         self.state_reference.update(data)
+
+
+
+    def backtrack_start(self, hours: int):
+        '''
+        Modifies the last started variable to
+        x number of hours
+
+        Parameters:
+        hours (int) : Number of hours
+        '''
+        if not self._state:
+            return
+        
+        deduct = timedelta(hours=hours)
+        self._last_start = self._last_start -  deduct
+        self.update_state()
 
 
 

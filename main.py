@@ -85,6 +85,7 @@ while True:
             time.sleep(30)
             machine.stop_stepper_motor()
             day_time = datetime.now()
+            machine.backtrack_start(hours=23)
 
         # Flag checker if npk failed to met required values
         if not npk_failed_notified and \
