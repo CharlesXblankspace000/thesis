@@ -80,7 +80,7 @@ while True:
 
         machine.update_parameters(data)
 
-        if datetime.now() - day_time >= timedelta(days=1):
+        if datetime.now() - day_time >= timedelta(hours=1):
             machine.start_stepper_motor()
             time.sleep(30)
             machine.stop_stepper_motor()
@@ -98,7 +98,7 @@ while True:
             and phosphorus >= 100 and potassium >= 100:
             machine.update_harvest_ready()
 
-        time.sleep(5)
+        time.sleep(10)
 
     else:
         pass
